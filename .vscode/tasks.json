@@ -1,0 +1,34 @@
+{
+  "version": "2.0",
+  "tasks": [
+    {
+      "label": "Compilar y copiar DLLs",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "g++",
+        "-std=c++17",
+        "-I${workspaceFolder}/SFML-2.5.1/include",
+        "-L${workspaceFolder}/SFML-2.5.1/lib",
+        "${workspaceFolder}/Proyecto/main.cpp",
+        "-o",
+        "${workspaceFolder}/Proyecto/juego.exe",
+        "-lsfml-graphics",
+        "-lsfml-window",
+        "-lsfml-system",
+        "-static-libgcc",
+        "-static-libstdc++",
+        "&&",
+        "copy",
+        "${workspaceFolder}\\SFML-2.5.1\\bin\\sfml-*.dll",
+        "${workspaceFolder}\\Proyecto\\"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -269,32 +269,71 @@ int main()
                     exportarEstadoMapa(grid, rows, cols);
                 }
                 else if (event.key.code == sf::Keyboard::R)
+{
+    // 1. Limpiar caminos anteriores
+    for (auto &cell : grid)
+        cell.isPath = false;
+
+    // 2. Verificar si ya hay cristal manual
+    bool hayCristalManual = false;
+    for (auto &c : grid)
+    {
+        if (c.isCrystal && !c.isReflected)
+        {
+            hayCristalManual = true;
+            break;
+        }
+    }
+
+    // 3. Si no hay, colocar uno que genere camino hasta la salida
+    if (!hayCristalManual)
+    {
+        bool colocado = false;
+        for (int intentos = 0; intentos < 300 && !colocado; ++intentos)
+        {
+            int idx = rand() % grid.size();
+            TriCell &c = grid[idx];
+            if (!c.isBlocked && !c.isExit)
+            {
+                // Limpiar todo antes de probar
+                for (auto &g : grid)
                 {
-                    bool hayCristalManual = false;
-                    for (auto &c : grid)
-                    {
-                        if (c.isCrystal && !c.isReflected)
-                        {
-                            hayCristalManual = true;
-                            break;
-                        }
-                    }
-                    if (!hayCristalManual)
-                    {
-                        for (auto &c : grid)
-                        {
-                            if (!c.isBlocked && !c.isExit)
-                            {
-                                c.isCrystal = true;
-                                c.isReflected = false;
-                                c.triangle.setFillColor(sf::Color::Cyan);
-                                propagateReflection(grid, c.row, c.col, rows, cols);
-                                break;
-                            }
-                        }
-                    }
-                    buscarCaminoBFS(grid, exitIndex, rows, cols);
+                    g.isCrystal = false;
+                    g.isReflected = false;
+                    g.isPath = false;
+                    if (!g.isExit && !g.isBlocked)
+                        g.triangle.setFillColor(sf::Color::White);
                 }
+
+                // Colocar cristal y reflejar
+                c.isCrystal = true;
+                c.isReflected = false;
+                c.triangle.setFillColor(sf::Color::Cyan);
+                propagateReflection(grid, c.row, c.col, rows, cols);
+
+                // Verificar si hay camino
+                buscarCaminoBFS(grid, exitIndex, rows, cols);
+                bool caminoValido = false;
+                for (const auto &g : grid)
+                {
+                    if (g.isPath)
+                    {
+                        caminoValido = true;
+                        break;
+                    }
+                }
+
+                if (caminoValido)
+                    colocado = true;
+            }
+        }
+    }
+    else
+    {
+        buscarCaminoBFS(grid, exitIndex, rows, cols);
+    }
+}
+
                 else if (event.key.code == sf::Keyboard::C)
                 {
                     for (auto &cell : grid)
